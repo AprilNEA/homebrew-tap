@@ -1,0 +1,125 @@
+name: Update Formula
+
+on:
+  repository_dispatch:
+    types: [update-formula]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version (e.g. 0.1.3)"
+        required: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Determine version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+            VERSION="${{ github.event.client_payload.version }}"
+          else
+            VERSION="${{ github.event.inputs.version }}"
+          fi
+          VERSION="${VERSION#v}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Download assets and compute checksums
+        id: checksums
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          BASE="https://github.com/AprilNEA/BYOKEY/releases/download/v${VERSION}"
+
+          declare -A TARGETS=(
+            [aarch64_apple_darwin]="aarch64-apple-darwin"
+            [x86_64_apple_darwin]="x86_64-apple-darwin"
+            [x86_64_unknown_linux_gnu]="x86_64-unknown-linux-gnu"
+            [aarch64_unknown_linux_gnu]="aarch64-unknown-linux-gnu"
+          )
+
+          for key in "${!TARGETS[@]}"; do
+            target="${TARGETS[$key]}"
+            url="${BASE}/byokey-v${VERSION}-${target}.tar.gz"
+            code=$(curl -sL -o /tmp/asset -w '%{http_code}' "$url")
+            if [ "$code" = "200" ]; then
+              sha=$(sha256sum /tmp/asset | awk '{print $1}')
+              echo "${key}=${sha}" >> "$GITHUB_OUTPUT"
+              echo "has_${key}=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "has_${key}=false" >> "$GITHUB_OUTPUT"
+            fi
+            rm -f /tmp/asset
+          done
+
+      - name: Generate formula
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+
+          {
+            echo 'class Byokey < Formula'
+            echo '  desc "Bring Your Own Keys — AI subscription-to-API proxy gateway"'
+            echo '  homepage "https://github.com/AprilNEA/BYOKEY"'
+            echo "  version \"${VERSION}\""
+            echo '  license any_of: ["MIT", "Apache-2.0"]'
+            echo ''
+            echo '  on_macos do'
+            if [ "${{ steps.checksums.outputs.has_aarch64_apple_darwin }}" = "true" ]; then
+              echo '    on_arm do'
+              echo '      url "https://github.com/AprilNEA/BYOKEY/releases/download/v#{version}/byokey-v#{version}-aarch64-apple-darwin.tar.gz"'
+              echo "      sha256 \"${{ steps.checksums.outputs.aarch64_apple_darwin }}\""
+              echo '    end'
+            fi
+            if [ "${{ steps.checksums.outputs.has_x86_64_apple_darwin }}" = "true" ]; then
+              echo '    on_intel do'
+              echo '      url "https://github.com/AprilNEA/BYOKEY/releases/download/v#{version}/byokey-v#{version}-x86_64-apple-darwin.tar.gz"'
+              echo "      sha256 \"${{ steps.checksums.outputs.x86_64_apple_darwin }}\""
+              echo '    end'
+            fi
+            echo '  end'
+            echo ''
+            echo '  on_linux do'
+            if [ "${{ steps.checksums.outputs.has_x86_64_unknown_linux_gnu }}" = "true" ]; then
+              echo '    on_intel do'
+              echo '      url "https://github.com/AprilNEA/BYOKEY/releases/download/v#{version}/byokey-v#{version}-x86_64-unknown-linux-gnu.tar.gz"'
+              echo "      sha256 \"${{ steps.checksums.outputs.x86_64_unknown_linux_gnu }}\""
+              echo '    end'
+            fi
+            if [ "${{ steps.checksums.outputs.has_aarch64_unknown_linux_gnu }}" = "true" ]; then
+              echo '    on_arm do'
+              echo '      url "https://github.com/AprilNEA/BYOKEY/releases/download/v#{version}/byokey-v#{version}-aarch64-unknown-linux-gnu.tar.gz"'
+              echo "      sha256 \"${{ steps.checksums.outputs.aarch64_unknown_linux_gnu }}\""
+              echo '    end'
+            fi
+            echo '  end'
+            echo ''
+            echo '  def install'
+            echo '    bin.install "byokey"'
+            echo '  end'
+            echo ''
+            echo '  service do'
+            echo '    run [opt_bin/"byokey", "serve"]'
+            echo '    keep_alive true'
+            echo '    working_dir var/"byokey"'
+            echo '    log_path var/"log/byokey.log"'
+            echo '    error_log_path var/"log/byokey.log"'
+            echo '  end'
+            echo ''
+            echo '  test do'
+            echo '    assert_match "byokey", shell_output("#{bin}/byokey --help")'
+            echo '  end'
+            echo 'end'
+          } > Formula/byokey.rb
+
+      - name: Commit and push
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/byokey.rb
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "Update byokey to ${VERSION}"
+          git push
