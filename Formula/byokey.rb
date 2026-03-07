@@ -1,7 +1,7 @@
 class Byokey < Formula
   desc "Bring Your Own Keys — AI subscription-to-API proxy gateway"
   homepage "https://github.com/AprilNEA/BYOKEY"
-  version "byokey-daemon-v0.5.3"
+  version "byokey-daemon-v0.6.0"
   license any_of: ["MIT", "Apache-2.0"]
 
   on_macos do
