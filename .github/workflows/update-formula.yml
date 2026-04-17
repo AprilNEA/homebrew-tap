@@ -1,4 +1,4 @@
-name: Update Formula
+name: Update Formula and Cask
 
 on:
   repository_dispatch:
@@ -114,12 +114,70 @@ jobs:
             echo 'end'
           } > Formula/byokey.rb
 
+      - name: Download DMGs and compute checksums
+        id: dmg_checksums
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          BASE="https://github.com/AprilNEA/BYOKEY/releases/download/v${VERSION}"
+
+          for arch in arm64 x86_64; do
+            url="${BASE}/Byokey-v${VERSION}-${arch}.dmg"
+            code=$(curl -sL -o /tmp/asset -w '%{http_code}' "$url")
+            if [ "$code" = "200" ]; then
+              sha=$(sha256sum /tmp/asset | awk '{print $1}')
+              echo "dmg_${arch}=${sha}" >> "$GITHUB_OUTPUT"
+              echo "has_dmg_${arch}=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "has_dmg_${arch}=false" >> "$GITHUB_OUTPUT"
+            fi
+            rm -f /tmp/asset
+          done
+
+      - name: Generate cask
+        if: steps.dmg_checksums.outputs.has_dmg_arm64 == 'true' && steps.dmg_checksums.outputs.has_dmg_x86_64 == 'true'
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          mkdir -p Casks
+
+          cat > Casks/byokey.rb <<EOF
+          cask "byokey" do
+            arch arm: "arm64", intel: "x86_64"
+
+            version "${VERSION}"
+            sha256 arm:   "${{ steps.dmg_checksums.outputs.dmg_arm64 }}",
+                   intel: "${{ steps.dmg_checksums.outputs.dmg_x86_64 }}"
+
+            url "https://github.com/AprilNEA/BYOKEY/releases/download/v#{version}/Byokey-v#{version}-#{arch}.dmg"
+            name "Byokey"
+            desc "Bring Your Own Keys — AI subscription-to-API proxy gateway"
+            homepage "https://github.com/AprilNEA/BYOKEY"
+
+            livecheck do
+              url :url
+              strategy :github_latest
+            end
+
+            depends_on macos: ">= :sequoia"
+
+            app "Byokey.app"
+
+            zap trash: [
+              "~/Library/Application Support/Byokey",
+              "~/Library/Preferences/io.byokey.desktop.plist",
+              "~/Library/Caches/io.byokey.desktop",
+              "~/Library/Logs/Byokey",
+              "~/.byokey",
+            ]
+          end
+          EOF
+
       - name: Commit and push
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add Formula/byokey.rb
+          [ -f Casks/byokey.rb ] && git add Casks/byokey.rb
           git diff --cached --quiet && echo "No changes" && exit 0
           git commit -m "Update byokey to ${VERSION}"
           git push

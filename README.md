@@ -1,38 +1,42 @@
-# Homebrew Tap for BYOKEY
+# AprilNEA's Homebrew Tap
 
-## Installation
+Homebrew packages for projects by [@AprilNEA](https://github.com/AprilNEA).
+
+## Tap
 
 ```bash
 brew tap AprilNEA/tap https://github.com/AprilNEA/homebrew-tap
-brew install byokey
 ```
 
-### Install from HEAD (latest main branch)
+## Available packages
+
+| Name | Type | Description |
+| --- | --- | --- |
+| [`byokey`](https://github.com/AprilNEA/BYOKEY) | formula | Bring Your Own Keys — AI subscription-to-API proxy gateway (CLI) |
+| [`byokey`](https://github.com/AprilNEA/BYOKEY) | cask | BYOKEY menu-bar desktop app (macOS) |
+
+## Installing
 
 ```bash
-brew install --HEAD byokey
+# CLI (formula)
+brew install AprilNEA/tap/byokey
+
+# Desktop app (cask)
+brew install --cask AprilNEA/tap/byokey
 ```
 
-## Usage
-
-```bash
-# Start the proxy server
-byokey serve
-
-# Or run as a background service
-brew services start byokey
-
-# Authenticate with a provider
-byokey login claude
-byokey login gemini
-
-# Check status
-byokey status
-```
+When a formula and a cask share a name, Homebrew may prompt you to
+disambiguate — add `--formula` or `--cask` explicitly.
 
 ## Updating
 
 ```bash
 brew update
-brew upgrade byokey
+brew upgrade byokey              # CLI
+brew upgrade --cask byokey       # desktop app
 ```
+
+## License
+
+Each package retains the license of its upstream project; see the
+individual project repositories for details.
