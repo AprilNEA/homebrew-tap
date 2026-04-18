@@ -1,9 +1,9 @@
 cask "byokey" do
   arch arm: "arm64", intel: "x86_64"
 
-  version "1.0.0"
-  sha256 arm:   "c9af8a07713e0a0d6f44750e60453b0ce88fc63833d0855fd7a4c2674be63aa8",
-         intel: "56f5aaab2569d6da4de957c642f1fb1643239f5566523b686f78cade960c51d7"
+  version "1.1.0"
+  sha256 arm:   "0616df363c423ca833988d23540136acb3c23518678599cd9018f98a21128ff7",
+         intel: "7fca9674d85e47724c829d00228ff610164b157ec228e9dd98eb8ef4eeaf6520"
 
   url "https://github.com/AprilNEA/BYOKEY/releases/download/v#{version}/Byokey-v#{version}-#{arch}.dmg"
   name "Byokey"
