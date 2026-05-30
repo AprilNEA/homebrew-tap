@@ -1,0 +1,88 @@
+name: Update OpenLogi Cask
+
+on:
+  repository_dispatch:
+    types: [update-openlogi]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version (e.g. 0.0.2)"
+        required: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Determine version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+            VERSION="${{ github.event.client_payload.version }}"
+          else
+            VERSION="${{ github.event.inputs.version }}"
+          fi
+          VERSION="${VERSION#v}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Download DMG and compute checksum
+        id: checksum
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          url="https://github.com/AprilNEA/OpenLogi/releases/download/v${VERSION}/OpenLogi-v${VERSION}-macos.dmg"
+          code=$(curl -sL -o /tmp/openlogi.dmg -w '%{http_code}' "$url")
+          if [ "$code" != "200" ]; then
+            echo "error: DMG not found at $url (HTTP $code)" >&2
+            exit 1
+          fi
+          sha=$(sha256sum /tmp/openlogi.dmg | awk '{print $1}')
+          echo "sha256=${sha}" >> "$GITHUB_OUTPUT"
+          rm -f /tmp/openlogi.dmg
+
+      - name: Generate cask
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          mkdir -p Casks
+
+          cat > Casks/openlogi.rb <<EOF
+          cask "openlogi" do
+            version "${VERSION}"
+            sha256 "${{ steps.checksum.outputs.sha256 }}"
+
+            url "https://github.com/AprilNEA/OpenLogi/releases/download/v#{version}/OpenLogi-v#{version}-macos.dmg"
+            name "OpenLogi"
+            desc "Lightweight, local-first companion for Logitech HID++ peripherals"
+            homepage "https://github.com/AprilNEA/OpenLogi"
+
+            livecheck do
+              url :url
+              strategy :github_latest
+            end
+
+            depends_on macos: :ventura
+            depends_on arch: :arm64
+
+            app "OpenLogi.app"
+
+            zap trash: [
+              "~/.config/openlogi",
+              "~/.local/share/openlogi",
+              "~/Library/Caches/org.openlogi.openlogi",
+              "~/Library/Preferences/org.openlogi.openlogi.plist",
+              "~/Library/Saved Application State/org.openlogi.openlogi.savedState",
+            ]
+          end
+          EOF
+
+      - name: Commit and push
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Casks/openlogi.rb
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "Update openlogi to ${VERSION}"
+          git push
