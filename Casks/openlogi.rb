@@ -1,6 +1,6 @@
 cask "openlogi" do
-  version "0.1.3"
-  sha256 "5d93364b38194e90f0b5ed9d8d9d338280992450f2b97fb1be581fd6089dbaea"
+  version "0.1.4"
+  sha256 "7aa98001c7dcb3e2fe854977cb2d3f4a45909fc0af3f3e501c2feca7a78b3184"
 
   url "https://github.com/AprilNEA/OpenLogi/releases/download/v#{version}/OpenLogi-v#{version}-macos.dmg"
   name "OpenLogi"
