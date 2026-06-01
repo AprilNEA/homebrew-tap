@@ -1,8 +1,11 @@
 cask "openlogi" do
-  version "0.3.2"
-  sha256 "e14d059473e978936df85474a669a98b7b35690c4115d763d73e77bfd30fe9fc"
+  arch arm: "arm64", intel: "x86_64"
 
-  url "https://github.com/AprilNEA/OpenLogi/releases/download/v#{version}/OpenLogi-v#{version}-macos.dmg"
+  version "0.3.2"
+  sha256 arm:   "e14d059473e978936df85474a669a98b7b35690c4115d763d73e77bfd30fe9fc",
+         intel: "1c6510f5bd63b551fe77363a0f4f3bd63540f0b03155f6b65ba1e6eead5cc1bb"
+
+  url "https://github.com/AprilNEA/OpenLogi/releases/download/v#{version}/OpenLogi-v#{version}-macos-#{arch}.dmg"
   name "OpenLogi"
   desc "Lightweight, local-first companion for Logitech HID++ peripherals"
   homepage "https://github.com/AprilNEA/OpenLogi"
@@ -12,8 +15,8 @@ cask "openlogi" do
     strategy :github_latest
   end
 
+  auto_updates true
   depends_on macos: :ventura
-  depends_on arch: :arm64
 
   app "OpenLogi.app"
 
