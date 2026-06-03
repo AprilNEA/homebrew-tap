@@ -15,15 +15,15 @@ cask "byokey" do
     strategy :github_latest
   end
 
-  depends_on macos: ">= :sequoia"
+  depends_on macos: :sequoia
 
   app "Byokey.app"
 
   zap trash: [
+    "~/.byokey",
     "~/Library/Application Support/Byokey",
-    "~/Library/Preferences/io.byokey.desktop.plist",
     "~/Library/Caches/io.byokey.desktop",
     "~/Library/Logs/Byokey",
-    "~/.byokey",
+    "~/Library/Preferences/io.byokey.desktop.plist",
   ]
 end

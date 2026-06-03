@@ -2,43 +2,39 @@
 
 Homebrew packages for projects by [@AprilNEA](https://github.com/AprilNEA).
 
-## Tap
-
 ```bash
-brew tap AprilNEA/tap https://github.com/AprilNEA/homebrew-tap
+brew tap AprilNEA/tap
 ```
 
-## Available packages
+## Packages
 
 | Name | Type | Description |
 | --- | --- | --- |
 | [`byokey`](https://github.com/AprilNEA/BYOKEY) | formula | Bring Your Own Keys — AI subscription-to-API proxy gateway (CLI) |
 | [`byokey`](https://github.com/AprilNEA/BYOKEY) | cask | BYOKEY menu-bar desktop app (macOS) |
-| [`openlogi`](https://github.com/AprilNEA/OpenLogi) | cask | OpenLogi — local-first companion for Logitech HID++ peripherals (macOS) |
-
-## Installing
 
 ```bash
-# CLI (formula)
-brew install AprilNEA/tap/byokey
-
-# Desktop apps (cask)
-brew install --cask AprilNEA/tap/byokey
-brew install --cask AprilNEA/tap/openlogi
+brew install AprilNEA/tap/byokey            # CLI (formula)
+brew install --cask AprilNEA/tap/byokey     # desktop app (cask)
 ```
 
-When a formula and a cask share a name, Homebrew may prompt you to
-disambiguate — add `--formula` or `--cask` explicitly.
+A formula and a cask share the `byokey` name; add `--formula` or `--cask` to
+disambiguate, and `brew upgrade` accordingly.
 
-## Updating
+## OpenLogi moved to homebrew-cask
+
+[OpenLogi](https://github.com/AprilNEA/OpenLogi) now ships in the official
+[Homebrew Cask](https://github.com/Homebrew/homebrew-cask) repository, so it no
+longer lives in this tap:
 
 ```bash
-brew update
-brew upgrade byokey                  # CLI
-brew upgrade --cask byokey openlogi  # desktop apps
+brew install --cask openlogi
 ```
+
+Existing `AprilNEA/tap/openlogi` installs are migrated to the official cask
+automatically on the next `brew update` (via `tap_migrations.json`).
 
 ## License
 
-Each package retains the license of its upstream project; see the
-individual project repositories for details.
+Each package retains the license of its upstream project; see the individual
+project repositories for details.

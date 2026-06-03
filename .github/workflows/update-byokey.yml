@@ -1,7 +1,8 @@
-name: Update Formula and Cask
+name: Update BYOKEY (formula + cask)
 
 on:
   repository_dispatch:
+    # event-type dispatched by AprilNEA/BYOKEY's build.yml — keep both in sync if renamed.
     types: [update-formula]
   workflow_dispatch:
     inputs:
@@ -157,16 +158,16 @@ jobs:
               strategy :github_latest
             end
 
-            depends_on macos: ">= :sequoia"
+            depends_on macos: :sequoia
 
             app "Byokey.app"
 
             zap trash: [
+              "~/.byokey",
               "~/Library/Application Support/Byokey",
-              "~/Library/Preferences/io.byokey.desktop.plist",
               "~/Library/Caches/io.byokey.desktop",
               "~/Library/Logs/Byokey",
-              "~/.byokey",
+              "~/Library/Preferences/io.byokey.desktop.plist",
             ]
           end
           EOF
