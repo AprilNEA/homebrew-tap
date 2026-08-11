@@ -1,0 +1,113 @@
+name: Update MCPlex Formula
+
+on:
+  repository_dispatch:
+    types: [update-mcplex]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version (e.g. 1.2.3)"
+        required: true
+
+concurrency:
+  group: update-mcplex-${{ github.event.client_payload.version || inputs.version }}
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: master
+
+      - name: Determine and validate version
+        id: version
+        env:
+          RAW_VERSION: ${{ github.event_name == 'repository_dispatch' && github.event.client_payload.version || inputs.version }}
+        run: |
+          VERSION="${RAW_VERSION#v}"
+          SEMVER_REGEX='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-((0|[1-9][0-9]*|[0-9A-Za-z-]*[A-Za-z-][0-9A-Za-z-]*)(\.(0|[1-9][0-9]*|[0-9A-Za-z-]*[A-Za-z-][0-9A-Za-z-]*))*))?(\+([0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*))?$'
+          if [[ ! "$VERSION" =~ $SEMVER_REGEX ]]; then
+            echo "error: '$RAW_VERSION' is not a valid SemVer release version" >&2
+            exit 1
+          fi
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Download assets and compute checksums
+        id: checksums
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          BASE="https://github.com/AprilNEA/MCPlex/releases/download/v${VERSION}"
+          DOWNLOAD_DIR=$(mktemp -d)
+          trap 'rm -rf "$DOWNLOAD_DIR"' EXIT
+
+          while IFS='|' read -r key asset; do
+            path="${DOWNLOAD_DIR}/${asset}"
+            url="${BASE}/${asset}"
+            code=$(curl --silent --show-error --location --output "$path" --write-out '%{http_code}' "$url")
+            if [ "$code" != "200" ]; then
+              echo "error: asset not found at $url (HTTP $code)" >&2
+              exit 1
+            fi
+            sha=$(sha256sum "$path" | awk '{print $1}')
+            echo "${key}=${sha}" >> "$GITHUB_OUTPUT"
+          done <<'EOF'
+          aarch64_apple_darwin|mcplex-aarch64-apple-darwin.tar.xz
+          x86_64_apple_darwin|mcplex-x86_64-apple-darwin.tar.xz
+          x86_64_unknown_linux_gnu|mcplex-x86_64-unknown-linux-gnu.tar.xz
+          EOF
+
+      - name: Generate formula
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+
+          cat > Formula/mcplex.rb <<EOF
+          class Mcplex < Formula
+            desc "A local MCP multiplexer"
+            homepage "https://github.com/AprilNEA/MCPlex"
+            version "${VERSION}"
+            license any_of: ["MIT", "Apache-2.0"]
+
+            on_macos do
+              on_arm do
+                url "https://github.com/AprilNEA/MCPlex/releases/download/v#{version}/mcplex-aarch64-apple-darwin.tar.xz"
+                sha256 "${{ steps.checksums.outputs.aarch64_apple_darwin }}"
+              end
+              on_intel do
+                url "https://github.com/AprilNEA/MCPlex/releases/download/v#{version}/mcplex-x86_64-apple-darwin.tar.xz"
+                sha256 "${{ steps.checksums.outputs.x86_64_apple_darwin }}"
+              end
+            end
+
+            on_linux do
+              on_intel do
+                url "https://github.com/AprilNEA/MCPlex/releases/download/v#{version}/mcplex-x86_64-unknown-linux-gnu.tar.xz"
+                sha256 "${{ steps.checksums.outputs.x86_64_unknown_linux_gnu }}"
+              end
+            end
+
+            def install
+              bin.install "mcplex"
+            end
+
+            test do
+              assert_match version.to_s, shell_output("#{bin}/mcplex --version")
+            end
+          end
+          EOF
+
+      - name: Validate formula syntax
+        run: ruby -c Formula/mcplex.rb
+
+      - name: Commit and push
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/mcplex.rb
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "Update mcplex to ${VERSION}"
+          git push origin master
