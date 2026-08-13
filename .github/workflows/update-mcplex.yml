@@ -90,11 +90,12 @@ jobs:
             end
 
             def install
-              bin.install "mcplex"
+              bin.install "mcplex", "mcplex-daemon"
             end
 
             test do
               assert_match version.to_s, shell_output("#{bin}/mcplex --version")
+              assert_match version.to_s, shell_output("#{bin}/mcplex-daemon --version")
             end
           end
           EOF
