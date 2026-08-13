@@ -1,24 +1,24 @@
 class Mcplex < Formula
   desc "A local MCP multiplexer"
   homepage "https://github.com/AprilNEA/MCPlex"
-  version "0.4.0"
+  version "0.5.0"
   license any_of: ["MIT", "Apache-2.0"]
 
   on_macos do
     on_arm do
       url "https://github.com/AprilNEA/MCPlex/releases/download/v#{version}/mcplex-aarch64-apple-darwin.tar.xz"
-      sha256 "15b93d5c6c843914b9619fa01f48ac914e3eccddb6745516371363871ccb9598"
+      sha256 "ddf5e6eb74f4bf2338dc64a305c048cb1bc57d6a249e8b8dfe37b6e0ec1979d9"
     end
     on_intel do
       url "https://github.com/AprilNEA/MCPlex/releases/download/v#{version}/mcplex-x86_64-apple-darwin.tar.xz"
-      sha256 "c87e60ddd499857bb37a11a102b56856a4d8eeb7dd59008024c75ef278990c22"
+      sha256 "c77e819acea0df8004fc9fedf26f205807c5635be53834664df2e1abfaa06f47"
     end
   end
 
   on_linux do
     on_intel do
       url "https://github.com/AprilNEA/MCPlex/releases/download/v#{version}/mcplex-x86_64-unknown-linux-gnu.tar.xz"
-      sha256 "bbf65c588fb855605bb0094433a7aa0f5f222f97742dad21908693b431dbe523"
+      sha256 "cdd213f39d9b4f41eb0ef7c4b84a7aeb456265b321943d8dc5d4734034c4145f"
     end
   end
 
