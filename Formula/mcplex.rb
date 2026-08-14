@@ -26,6 +26,13 @@ class Mcplex < Formula
     bin.install "mcplex", "mcplex-daemon"
   end
 
+  service do
+    run [opt_bin/"mcplex-daemon", "--foreground"]
+    keep_alive true
+    log_path var/"log/mcplex.log"
+    error_log_path var/"log/mcplex.log"
+  end
+
   test do
     assert_match version.to_s, shell_output("#{bin}/mcplex --version")
     assert_match version.to_s, shell_output("#{bin}/mcplex-daemon --version")
