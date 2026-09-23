@@ -10,17 +10,15 @@ cask "byokey" do
   desc "Bring Your Own Keys — AI subscription-to-API proxy gateway"
   homepage "https://github.com/AprilNEA/BYOKEY"
 
-  livecheck do
-    url :url
-    strategy :github_latest
-  end
+  deprecate! date: "2026-09-23", because: :discontinued, replacement_formula: "byokey"
+  disable! date: "2027-09-23", because: :discontinued, replacement_formula: "byokey"
 
   depends_on macos: :sequoia
 
   app "Byokey.app"
 
+  # ~/.byokey is left alone: the byokey formula keeps its tokens and config there.
   zap trash: [
-    "~/.byokey",
     "~/Library/Application Support/Byokey",
     "~/Library/Caches/io.byokey.desktop",
     "~/Library/Logs/Byokey",
