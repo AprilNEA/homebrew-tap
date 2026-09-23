@@ -1,28 +1,28 @@
 class Byokey < Formula
   desc "Bring Your Own Keys — AI subscription-to-API proxy gateway"
   homepage "https://github.com/AprilNEA/BYOKEY"
-  version "1.2.0"
+  version "1.3.0"
   license any_of: ["MIT", "Apache-2.0"]
 
   on_macos do
     on_arm do
       url "https://github.com/AprilNEA/BYOKEY/releases/download/v#{version}/byokey-v#{version}-aarch64-apple-darwin.tar.gz"
-      sha256 "d8e53000f0fd6342d856a51fe4f6fba78365467e8d18388b9f93b2255eaa838b"
+      sha256 "121154202e212b4e843a4717a377574e5ea5a0530e7b16d34949453d9b4142db"
     end
     on_intel do
       url "https://github.com/AprilNEA/BYOKEY/releases/download/v#{version}/byokey-v#{version}-x86_64-apple-darwin.tar.gz"
-      sha256 "ca2319de4d3207c3ecd568b6ecb86d3d8690b88a858cf61c52140622f5e66629"
+      sha256 "2e7e9a988db3e509d0fd3f2cbf6bc536d67b8fb5a8fa5d4ecbbe2191d356ae7f"
     end
   end
 
   on_linux do
     on_intel do
       url "https://github.com/AprilNEA/BYOKEY/releases/download/v#{version}/byokey-v#{version}-x86_64-unknown-linux-gnu.tar.gz"
-      sha256 "77fecc6dd78a66db414997acfd0d69522e783d452f16bd0c3db2e186902ac52c"
+      sha256 "cb860198e564d7173d5abac22601c527fcf839087eef357a5c60ef96d5c86150"
     end
     on_arm do
       url "https://github.com/AprilNEA/BYOKEY/releases/download/v#{version}/byokey-v#{version}-aarch64-unknown-linux-gnu.tar.gz"
-      sha256 "c19b4c2d8b1dd23006303774902073efe9c282c6bb63876dbee9d9cf0931bce0"
+      sha256 "00bb8d4d5b8daa4a340487c034b9fff29ef77f437cfd7c4d3bbb1bd956793811"
     end
   end
 
