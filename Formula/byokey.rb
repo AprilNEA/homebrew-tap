@@ -16,6 +16,10 @@ class Byokey < Formula
   end
 
   on_linux do
+    on_intel do
+      url "https://github.com/AprilNEA/BYOKEY/releases/download/v#{version}/byokey-v#{version}-x86_64-unknown-linux-gnu.tar.gz"
+      sha256 "02e6fab4bb92fbeecae7db22724e474d40e43c3ad8362c01fb4a014630e45e08"
+    end
     on_arm do
       url "https://github.com/AprilNEA/BYOKEY/releases/download/v#{version}/byokey-v#{version}-aarch64-unknown-linux-gnu.tar.gz"
       sha256 "fc04065d63c7e59f92dbaf535685480533d776cb1302452a41c57f8297aee88c"
