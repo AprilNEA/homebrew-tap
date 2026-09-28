@@ -10,8 +10,8 @@ cask "byokey" do
   desc "Bring Your Own Keys — AI subscription-to-API proxy gateway"
   homepage "https://github.com/AprilNEA/BYOKEY"
 
-  deprecate! date: "2026-09-23", because: :discontinued, replacement_formula: "byokey"
-  disable! date: "2027-09-23", because: :discontinued, replacement_formula: "byokey"
+  deprecate! date: "2026-09-23", because: :discontinued
+  disable! date: "2027-09-23", because: :discontinued
 
   depends_on macos: :sequoia
 

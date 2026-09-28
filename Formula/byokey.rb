@@ -4,6 +4,9 @@ class Byokey < Formula
   version "3.0.0"
   license any_of: ["MIT", "Apache-2.0"]
 
+  deprecate! date: "2026-09-28", because: :repo_archived
+  disable! date: "2027-09-28", because: :repo_archived
+
   on_macos do
     on_arm do
       url "https://github.com/AprilNEA/BYOKEY/releases/download/v#{version}/byokey-v#{version}-aarch64-apple-darwin.tar.gz"
