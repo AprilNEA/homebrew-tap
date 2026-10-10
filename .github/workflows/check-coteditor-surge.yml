@@ -1,0 +1,24 @@
+name: Check CotEditor Surge Cask
+
+on:
+  push:
+    paths:
+      - Casks/coteditor-surge.rb
+      - .github/workflows/check-coteditor-surge.yml
+  pull_request:
+    paths:
+      - Casks/coteditor-surge.rb
+      - .github/workflows/check-coteditor-surge.yml
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: macos-latest
+    steps:
+      - uses: Homebrew/actions/setup-homebrew@2026.09.28.1
+        with:
+          stable: true
+      - run: brew style Casks/coteditor-surge.rb
+      - run: brew audit --strict --online --cask AprilNEA/tap/coteditor-surge
