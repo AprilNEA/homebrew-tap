@@ -26,7 +26,7 @@ it shares its name with the formula, so add `--formula` or `--cask` to
 disambiguate. To switch: `brew uninstall --cask byokey && brew install --formula byokey`.
 
 CotEditor Surge requires CotEditor 7 or later at `/Applications/CotEditor.app`.
-The cask installs Python; diagnostics also require Surge Mac 6.10.0 or later.
+The cask includes a universal Swift executable; diagnostics also require Surge Mac 6.10.0 or later.
 Before replacing a manual installation, follow the [migration instructions](https://github.com/AprilNEA/coteditor-surge#安装).
 Use `brew upgrade --cask coteditor-surge` to update and `brew uninstall --cask coteditor-surge` to remove the syntax and scripts.
 
